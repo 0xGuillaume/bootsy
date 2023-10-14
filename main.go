@@ -21,7 +21,8 @@ func createDirectories(dirs []string) {
 }
 
 func git() {
-	//files := []string{".gitignore", "README.md"}
+	files := []string{".gitignore", "README.md"}
+
 	init := exec.Command("git", "init")
 
 	_, err := init.Output()
@@ -30,6 +31,8 @@ func git() {
 		fmt.Println(err.Error())
 		return
 	}
+
+	createFiles(files)
 }
 
 func terraform() {
@@ -45,6 +48,32 @@ func terraform() {
 	createFiles(files)
 }
 
+func python() {
+	files := []string{
+		"main.py",
+		"requirements.txt",
+	}
+	createFiles(files)
+}
+
+func html() {
+	dirs := []string{
+		"static",
+		"static/css",
+		"static/js",
+		"assets",
+		"assets/images",
+	}
+	files := []string{
+		"static/css/main.css",
+		"static/js/main.js",
+		"index.html",
+	}
+
+	createDirectories(dirs)
+	createFiles(files)
+}
+
 func main() {
 	fmt.Println("Hello World!")
 
@@ -53,6 +82,8 @@ func main() {
 	os.Mkdir(dir, 0777)
 	os.Chdir(dir)
 
-	terraform()
+	//terraform()
+	//python()
+	html()
 	git()
 }
