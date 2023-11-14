@@ -1,0 +1,8 @@
+[python]
+dirs = ["foo", "bar"]
+files = ["main.tf", "variables.py"]
+
+[terraform]
+dirs = ["foo", "bar"]
+files = ["main.tf", "variables.tf"]
+
