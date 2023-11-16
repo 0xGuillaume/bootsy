@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import logging
 import tempfile
 import argparse
 from pathlib import Path
@@ -9,9 +10,10 @@ with open("bootsy.toml", "rb") as file:
     config = tomllib.load(file)
 
 parser = argparse.ArgumentParser(
-                    prog="Bootsy",
-                    description="Setup a programming language environment based on a TOML configuration file.",
-                    epilog="By 0xGuillaume")
+    prog="Bootsy",
+    description="Setup a programming language environment based on a TOML configuration file.",
+    epilog="By 0xGuillaume"
+)
 
 parser.add_argument("env", help="Chose an environment to setup.", choices=config)
 parser.add_argument("-p", "--path", help="Specify a path to set up the envrionment. Default is working directory.", required=False)
@@ -24,8 +26,23 @@ if not args.path:
 else:
     path = Path(args.path)
 
-
 # ==================================================================
+
+
+def is_config_correct() -> bool:
+    """."""
+
+    compliant = True
+
+    for env in config:
+        if "dirs" in config[env] and "files" in config[env]:
+            print("toto")
+            logging.error(f"No dirs or files key in env : {config[env]}")
+            compliant = False
+
+    return compliant
+
+
 
 def is_config_compliant() -> bool:
     """Check wether or not the TOML config file is compliant."""
@@ -33,23 +50,32 @@ def is_config_compliant() -> bool:
     compliant = True
 
     for env in config:
-
         with tempfile.TemporaryDirectory() as tmpdir:
-            for dir_ in config[env]["dirs"]:
-                _path = Path(tmpdir) / dir_
-                _path.mkdir()
+            for directory in config[env]["dirs"]:
+                try:
+                    _path = Path(tmpdir) / directory
+                    _path.mkdir()
 
-            try:
-                for file in config[env]["files"]:
+                except (
+                    FileNotFoundError,
+                    FileExistsError
+                ) as error:
+                    logging.error(f"directory do not exists : {directory}")
+                    compliant = False
+
+            for file in config[env]["files"]:
+                try:
                     _path = Path(tmpdir) / file
                     _path.touch()
 
-            except FileNotFoundError as error:
-                print("file do not exists :", file)
-                compliant = False
+                except (
+                    FileNotFoundError, 
+                    FileExistsError
+                ) as error:
+                    logging.error(f"file do not exists : {file}")
+                    compliant = False
             
     return compliant 
-        
 
 
 def mkdir() -> None:
@@ -79,10 +105,12 @@ def touch() -> None:
 
 
 if __name__ == "__main__":
-    if not any(vars(args).values()):
-        parser.error("Aucun env spécifié")
-    
-    if is_config_compliant():
-        mkdir()
-        touch()
+    is_config_correct()
+
+    #if not any(vars(args).values()):
+    #    parser.error("Aucun env spécifié")
+    #
+    #if is_config_compliant():
+    #    mkdir()
+    #    touch()
 
