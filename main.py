@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import sys
 import logging
 import tempfile
 import argparse
@@ -29,22 +30,24 @@ else:
 # ==================================================================
 
 
-def is_config_correct() -> bool:
+def is_files_and_dirs_key() -> bool:
     """."""
 
     compliant = True
 
     for env in config:
-        if "dirs" in config[env] and "files" in config[env]:
-            print("toto")
-            logging.error(f"No dirs or files key in env : {config[env]}")
+        if not "dirs" in config[env]:  
+            logging.error(f"No dirs key in env : {config[env]}")
+            compliant = False
+
+        if not "files" in config[env]:
+            logging.error(f"No files key in env : {config[env]}")
             compliant = False
 
     return compliant
 
 
-
-def is_config_compliant() -> bool:
+def is_given_path_exists() -> bool:
     """Check wether or not the TOML config file is compliant."""
 
     compliant = True
@@ -78,6 +81,10 @@ def is_config_compliant() -> bool:
     return compliant 
 
 
+def is_config_compliant() -> bool:
+    return is_files_and_dirs_key() and is_given_path_exists()
+
+
 def mkdir() -> None:
     """Create new directories."""
 
@@ -105,12 +112,17 @@ def touch() -> None:
 
 
 if __name__ == "__main__":
-    is_config_correct()
 
-    #if not any(vars(args).values()):
-    #    parser.error("Aucun env spécifié")
-    #
+
+    if not is_files_and_dirs_key():
+        sys.exit()
+
+    if not is_given_path_exists(): 
+        sys.exit()
+
+    if not any(vars(args).values()):
+        parser.error("Aucun env spécifié")
+    
     #if is_config_compliant():
     #    mkdir()
     #    touch()
-
