@@ -4,13 +4,13 @@
 import logging
 import sys
 from argparse import ArgumentParser
-from os import environ
+from os import environ, path
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from tomllib import load
 
 
-DEFAULT_CONFIG = "~/.config/.bootsy.toml"
+DEFAULT_CONFIG = path.expanduser("~/.config/.bootsy.toml")
 FORMAT = '[BOOTSY] %(message)s'
 VENV_CONFIG = environ.get("BOOTSY")
 
@@ -33,9 +33,9 @@ def read_config() -> dict:
 
     except FileNotFoundError:
         logging.error((
-            "[CONFIG] File '~/.config/.bootsy' not found. "
-            "Create the config file there or indicate the config "
-            "file path into BOOTSY environment variable."
+            "[CONFIG] File '~/.config/.bootsy.toml' not found. "
+            "If you located the file elsewhere indicate it in BOOTSY "
+            "environment variable."
         ))
         sys.exit()
 
