@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+"""Bootsy script."""
 import logging
 from argparse import ArgumentParser
 from os import environ
@@ -7,9 +8,9 @@ from tempfile import TemporaryDirectory
 from tomllib import load
 
 
-VENV_CONFIG = environ.get("BOOTSY")
 DEFAULT_CONFIG = "~/.config/.bootsy.toml"
 FORMAT = '[BOOTSY] %(message)s'
+VENV_CONFIG = environ.get("BOOTSY")
 
 
 def read_config() -> dict:
@@ -19,10 +20,17 @@ def read_config() -> dict:
         A dict containing bootsy config.
     """
 
+    config_path = VENV_CONFIG
+
     if not VENV_CONFIG:
-        #with open(DEFAULT_CONFIG, "rb") as config:
-        with open("bootsy.toml", "rb") as config:
-            return load(config)
+        config_path = DEFAULT_CONFIG
+
+    config_path = "bootsy.toml"
+
+    with open(config_path, "rb") as file:
+        config = load(file)
+
+    return config
 
 
 CONFIG = read_config()
@@ -38,7 +46,7 @@ def is_files_and_dirs_key() -> bool:
     compliant = True
 
     for env in CONFIG:
-        if not "dirs" in CONFIG[env]:  
+        if not "dirs" in CONFIG[env]:
             logging.error(f"[{env}] - Key 'dirs' is required but missing.")
             compliant = False
 
@@ -69,8 +77,10 @@ def is_given_path_exists() -> bool:
                 except (
                     FileNotFoundError,
                     FileExistsError
-                ) as error:
-                    logging.error(f"[{env}] - Directory '{directory}' cannot be created. Path may not exist.")
+                ):
+                    logging.error(
+                        f"[{env}] - Directory '{directory}' cannot be created. Path may not exist."
+                    )
                     compliant = False
 
             for file in CONFIG[env]["files"]:
@@ -79,13 +89,15 @@ def is_given_path_exists() -> bool:
                     _path.touch()
 
                 except (
-                    FileNotFoundError, 
+                    FileNotFoundError,
                     FileExistsError
-                ) as error:
-                    logging.error(f"[{env}] - File '{file}' cannot be created. Path may not exist.")
+                ):
+                    logging.error(
+                        f"[{env}] - File '{file}' cannot be created. Path may not exist."
+                    )
                     compliant = False
-            
-    return compliant 
+
+    return compliant
 
 
 def is_config_compliant() -> bool:
@@ -108,7 +120,7 @@ def mkdir() -> None:
             path_.mkdir()
 
         except FileExistsError:
-            logging.error(f"[{env}] - Directory '{directory}' already exists.")
+            logging.error(f"[{args.env}] - Directory '{directory}' already exists.")
 
 
 def touch() -> None:
@@ -121,7 +133,7 @@ def touch() -> None:
             path_.touch()
 
         except FileNotFoundError:
-            logging.error(f"[{env}] - File '{file}' already exists.")
+            logging.error(f"[{args.env}] - File '{file}' already exists.")
 
 
 if __name__ == "__main__":
@@ -132,11 +144,19 @@ if __name__ == "__main__":
         description="Setup a programming language environment based on a TOML configuration file.",
     )
 
-    parser.add_argument("env", help="Pick an environment to setup.", choices=CONFIG)
-    parser.add_argument("-p", "--path", help="Specify a path to set up the envrionment. Default is working directory.", required=False)
+    parser.add_argument(
+        "env",
+        help="Pick an environment to setup.",
+        choices=CONFIG
+    )
+
+    parser.add_argument(
+        "-p", "--path",
+        help="Specify a path to set up the envrionment. Default is working directory.",
+        required=False
+    )
 
     args = parser.parse_args()
-
 
     if not args.path:
         path = Path.cwd()
