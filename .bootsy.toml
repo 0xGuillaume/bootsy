@@ -1,0 +1,3 @@
+[python]
+dirs = ["toto", "bar"]
+files = ["toto/main.tf", "variables.py"]
