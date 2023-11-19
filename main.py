@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-"""Bootsy script."""
+"""Bootsy script to setup custom environment."""
+
 import logging
 from argparse import ArgumentParser
 from os import environ
@@ -24,8 +25,6 @@ def read_config() -> dict:
 
     if not VENV_CONFIG:
         config_path = DEFAULT_CONFIG
-
-    config_path = "bootsy.toml"
 
     with open(config_path, "rb") as file:
         config = load(file)
