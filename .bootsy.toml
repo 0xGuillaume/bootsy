@@ -1,3 +1,7 @@
 [python]
-dirs = ["toto", "bar"]
-files = ["toto/main.tf", "variables.py"]
+dirs = []
+files = ["main.py", "requirements.txt"]
+
+[terraform]
+dirs = ["environment"]
+files = ["main.tf", "variables.tf", "outputs.tf", "providers.tf", "versions.tf", "environment/dev.tfvars"]
