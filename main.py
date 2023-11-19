@@ -1,37 +1,31 @@
 #!/usr/bin/python3
-import sys
 import logging
-import tempfile
-import argparse
+from argparse import ArgumentParser
+from os import environ
 from pathlib import Path
-import tomllib
+from tempfile import TemporaryDirectory
+from tomllib import load
 
 
+VENV_CONFIG = environ.get("BOOTSY")
+DEFAULT_CONFIG = "~/.config/.bootsy.toml"
 FORMAT = '[BOOTSY] %(message)s'
-logging.basicConfig(format=FORMAT)
 
 
-with open("bootsy.toml", "rb") as file:
-    config = tomllib.load(file)
+def read_config() -> dict:
+    """Read bootsy TOML config.
+
+    Returns:
+        A dict containing bootsy config.
+    """
+
+    if not VENV_CONFIG:
+        #with open(DEFAULT_CONFIG, "rb") as config:
+        with open("bootsy.toml", "rb") as config:
+            return load(config)
 
 
-parser = argparse.ArgumentParser(
-    prog="Bootsy",
-    description="Setup a programming language environment based on a TOML configuration file.",
-    epilog="By 0xGuillaume"
-)
-
-parser.add_argument("env", help="Chose an environment to setup.", choices=config)
-parser.add_argument("-p", "--path", help="Specify a path to set up the envrionment. Default is working directory.", required=False)
-
-args = parser.parse_args()
-
-
-if not args.path:
-    path = Path.cwd()
-
-else:
-    path = Path(args.path)
+CONFIG = read_config()
 
 
 def is_files_and_dirs_key() -> bool:
@@ -43,12 +37,12 @@ def is_files_and_dirs_key() -> bool:
 
     compliant = True
 
-    for env in config:
-        if not "dirs" in config[env]:  
+    for env in CONFIG:
+        if not "dirs" in CONFIG[env]:  
             logging.error(f"[{env}] - Key 'dirs' is required but missing.")
             compliant = False
 
-        if not "files" in config[env]:
+        if not "files" in CONFIG[env]:
             logging.error(f"[{env}] - Key 'files' is required but missing.")
             compliant = False
 
@@ -65,9 +59,9 @@ def is_given_path_exists() -> bool:
 
     compliant = True
 
-    for env in config:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            for directory in config[env]["dirs"]:
+    for env in CONFIG:
+        with TemporaryDirectory() as tmpdir:
+            for directory in CONFIG[env]["dirs"]:
                 try:
                     _path = Path(tmpdir) / directory
                     _path.mkdir()
@@ -79,7 +73,7 @@ def is_given_path_exists() -> bool:
                     logging.error(f"[{env}] - Directory '{directory}' cannot be created. Path may not exist.")
                     compliant = False
 
-            for file in config[env]["files"]:
+            for file in CONFIG[env]["files"]:
                 try:
                     _path = Path(tmpdir) / file
                     _path.touch()
@@ -107,7 +101,7 @@ def is_config_compliant() -> bool:
 def mkdir() -> None:
     """Create directories."""
 
-    for directory in config[args.env]["dirs"]:
+    for directory in CONFIG[args.env]["dirs"]:
         path_ = path / directory
 
         try:
@@ -120,7 +114,7 @@ def mkdir() -> None:
 def touch() -> None:
     """Create files."""
 
-    for file in config[args.env]["files"]:
+    for file in CONFIG[args.env]["files"]:
         path_ = path / file
 
         try:
@@ -131,6 +125,24 @@ def touch() -> None:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format=FORMAT)
+
+    parser = ArgumentParser(
+        prog="Bootsy",
+        description="Setup a programming language environment based on a TOML configuration file.",
+    )
+
+    parser.add_argument("env", help="Pick an environment to setup.", choices=CONFIG)
+    parser.add_argument("-p", "--path", help="Specify a path to set up the envrionment. Default is working directory.", required=False)
+
+    args = parser.parse_args()
+
+
+    if not args.path:
+        path = Path.cwd()
+
+    else:
+        path = Path(args.path)
 
     if is_config_compliant():
         mkdir()
