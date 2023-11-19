@@ -2,6 +2,7 @@
 """Bootsy script to setup custom environment."""
 
 import logging
+import sys
 from argparse import ArgumentParser
 from os import environ
 from pathlib import Path
@@ -26,13 +27,19 @@ def read_config() -> dict:
     if not VENV_CONFIG:
         config_path = DEFAULT_CONFIG
 
-    with open(config_path, "rb") as file:
-        config = load(file)
+    try:
+        with open(config_path, "rb") as file:
+            config = load(file)
+
+    except FileNotFoundError:
+        logging.error((
+            "[CONFIG] File '~/.config/.bootsy' not found. "
+            "Create the config file there or indicate the config "
+            "file path into BOOTSY environment variable."
+        ))
+        sys.exit()
 
     return config
-
-
-CONFIG = read_config()
 
 
 def is_files_and_dirs_key() -> bool:
@@ -137,6 +144,8 @@ def touch() -> None:
 
 if __name__ == "__main__":
     logging.basicConfig(format=FORMAT)
+
+    CONFIG = read_config()
 
     parser = ArgumentParser(
         prog="Bootsy",
