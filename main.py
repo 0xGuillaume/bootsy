@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 """Bootsy script to setup custom environment."""
-
 import logging
 import sys
 from argparse import ArgumentParser
