@@ -7,6 +7,7 @@ from os import environ, path
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from tomllib import load
+from subprocess import run
 
 
 DEFAULT_CONFIG = path.expanduser("~/.config/.bootsy.toml")
@@ -39,6 +40,14 @@ def read_config() -> dict:
         sys.exit()
 
     return config
+
+
+def init_git_repo() -> None:
+    """Initialize a git repository."""
+
+    run(["git", "init", path])
+    (path / ".gitinore").touch()
+    (path / "README.md").touch()
 
 
 def is_files_and_dirs_key() -> bool:
@@ -163,6 +172,13 @@ if __name__ == "__main__":
         required=False
     )
 
+    parser.add_argument(
+        "-g", "--git",
+        help="Initialize a git repository plus both .gitignore and README.",
+        required=False,
+        action="store_true"
+    )
+
     args = parser.parse_args()
 
     if not args.path:
@@ -174,3 +190,6 @@ if __name__ == "__main__":
     if is_config_compliant():
         mkdir()
         touch()
+
+        if args.git:
+            init_git_repo()
