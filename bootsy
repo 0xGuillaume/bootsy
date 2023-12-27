@@ -71,7 +71,7 @@ def is_files_and_dirs_key() -> bool:
     return compliant
 
 
-def is_given_path_exists() -> bool:
+def are_config_paths_exist() -> bool:
     """Check if dirs & files could be created based
     on filled paths.
 
@@ -121,7 +121,7 @@ def is_config_compliant() -> bool:
         A boolean indicating the config compliancy.
     """
 
-    return is_files_and_dirs_key() and is_given_path_exists()
+    return is_files_and_dirs_key() and are_config_paths_exist()
 
 
 def mkdir() -> None:
@@ -187,9 +187,12 @@ if __name__ == "__main__":
     else:
         path = Path(args.path)
 
-    if is_config_compliant():
-        mkdir()
-        touch()
+    if path.is_dir() and path.exists():
+        if is_config_compliant():
+            mkdir()
+            touch()
 
-        if args.git:
-            init_git_repo()
+            if args.git:
+                init_git_repo()
+    else:
+        logging.error("[ERROR] Path must be an existing directory.")
