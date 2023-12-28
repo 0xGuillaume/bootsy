@@ -10,7 +10,7 @@ The tool is made in _Python_ with only built-in packages to avoid installing add
 
 By default the `.bootsy.toml` config file is attend to be stored in the `~/.config` directory.
 
-If `~/.config` directory doesn't exist or you want to place the configuration somewhere else please use an environment variable named `BOOTSY` with config file location.
+If `~/.config` directory doesn't exist or you want to place the configuration somewhere else please use an environment variable named `BOOTSY` with config file location as value.
 
 ```bash 
 $ export BOOTSY="/etc/.bootsy.toml"
